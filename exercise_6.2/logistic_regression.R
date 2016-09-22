@@ -114,10 +114,19 @@ coef(summary(work.mod))
 work.mod.tbl <- coef(summary(work.mod))
 work.mod.tbl[,"Estimate"] <- exp(coef(work.mod)) ##convert coefficients out of log-odds mode
 work.mod.tbl ##Create Dataset with Unique marital values, using mean age as a constant
+unique(NH11$r_maritl)
 predWork <- with(NH11,
-                expand.grid(r_maritl = c("1 Married - spouse in household","2 Married - spouse not in household","4 Widowed","5 Divorced","6 Separated","7 Never married","8 Living with partner","9 Unknown marital status"), 
+                expand.grid(r_maritl = c("1 Married - spouse in household",
+                                         "2 Married - spouse not in household",
+                                         "4 Widowed",
+                                         "5 Divorced",
+                                         "6 Separated",
+                                         "7 Never married",
+                                         "8 Living with partner",
+                                         "9 Unknown marital status"), 
                             age_p = mean(age_p, na.rm = TRUE)))
-cbind(predWork, predict(work.mod, type = "response", se.fit = TRUE, interval="confidence", newdata = predWork)) ##'fit' column defines probability of having ever worked at age_p constant w/ respect to marital status.
+cbind(predWork, predict(work.mod, type = "response", se.fit = TRUE, interval="confidence", newdata = predWork)) 
+##'fit' column defines probability of having ever worked at age_p constant w/ respect to marital status.
 ##   Note that the data is not perfectly clean and ready to be modeled. You
 ##   will need to clean up at least some of the variables before fitting
 ##   the model.
