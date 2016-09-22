@@ -24,7 +24,7 @@
 
 ##   Load the National Health Interview Survey data:
 
-NH11 <- readRDS("dataSets/NatHealth2011.rds")
+NH11 <- readRDS("exercise_6.2/dataSets/NatHealth2011.rds")
 labs <- attributes(NH11)$labels
 
 ##   [CDC website] http://www.cdc.gov/nchs/nhis.htm
@@ -100,11 +100,24 @@ plot(allEffects(hyp.out))
 
 ##   1. Use glm to conduct a logistic regression to predict ever worked
 ##      (everwrk) using age (age_p) and marital status (r_maritl).
+### Step 1: Isolate dependent variable
+str(NH11$everwrk) ## factor with 5 levels? ascertain levels...
+unique(NH11$everwrk) ## limit levels to just "yes" and "no"
+NH11$everwrk <- factor(NH11$everwrk, levels=c("2 No", "1 Yes"))
+### Step 2: Call Logistic Regression
 work.mod <- glm(everwrk~age_p+r_maritl, data = NH11, family = "binomial")
-summary(work.mod)
+work.mod
+coef(summary(work.mod))
 ##   2. Predict the probability of working for each level of marital
 ##      status.
-
+### Step 1: Use examples above to call glm() and 
+work.mod.tbl <- coef(summary(work.mod))
+work.mod.tbl[,"Estimate"] <- exp(coef(work.mod)) ##convert coefficients out of log-odds mode
+work.mod.tbl ##Create Dataset with Unique marital values, using mean age as a constant
+predWork <- with(NH11,
+                expand.grid(r_maritl = c("1 Married - spouse in household","2 Married - spouse not in household","4 Widowed","5 Divorced","6 Separated","7 Never married","8 Living with partner","9 Unknown marital status"), 
+                            age_p = mean(age_p, na.rm = TRUE)))
+cbind(predWork, predict(work.mod, type = "response", se.fit = TRUE, interval="confidence", newdata = predWork)) ##'fit' column defines probability of having ever worked at age_p constant w/ respect to marital status.
 ##   Note that the data is not perfectly clean and ready to be modeled. You
 ##   will need to clean up at least some of the variables before fitting
 ##   the model.
